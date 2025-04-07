@@ -97,9 +97,9 @@ else:
             with col_next:
                 if st.button("⬅️إرسال والانتقال للسؤال التالي"):
                     if st.session_state.index < len(st.session_state.annotations):
-                        st.session_state.annotations[st.session_state.index] = [question, answer, urgency]
+                        st.session_state.annotations[st.session_state.index] = [question, urgency]
                     else:
-                        st.session_state.annotations.append([question, answer, urgency])
+                        st.session_state.annotations.append([question, urgency])
                     
                     st.session_state.index += 1
                     st.rerun()
