@@ -35,7 +35,10 @@ def display_definitions():
 
 def authenticate_doctor():
     st.title("🔑 تسجيل الدخول")
-    st.write(" السلام عليكم ! هذا المشروع هو جزء من أطروحة بحثية حول ذكاء اصطناعي للإسعافات الأولية باللغة العربية. دوركم هو تصنيف الأسئلة الطبية بناءً على مدى إلحاحها، وسيساعد تصنيفكم في تحسين دقة روبوت الدردشة الطبي. شكرًا لمساهمتكم!")
+    st.write(""" السلام عليكم! هذا المشروع هو جزء من أطروحة بحثية لبناء نظام ذكاء اصطناعي (روبوت دردشة) للإسعافات الأولية باللغة العربية. 
+    بالإشارة إلى تعريف الإسعافات الأولية  المعروض في الهامش  الأيمن من الصفحة، يرجى تصنيف كل سؤال من الأسئلة الطبية التي ستعرض عليكم إلى سؤال "عاجل" أو سؤال "غير عاجل". 
+    ستساهم مشاركتكم في تحسين دقة روبوت الدردشة الطبي. شكرًا لمساهمتكم!
+   """)
     
     doctor_code = st.text_input("الرجاء إدخال رمز الطبيب", type="password")
     if st.button("تسجيل الدخول"):
@@ -71,17 +74,17 @@ else:
         
         if st.session_state.index < len(df):
             question = df.iloc[st.session_state.index]["Question"]
-            answer = df.iloc[st.session_state.index]["Answer"]
+            
             
             st.markdown(f"**📝 السؤال {st.session_state.index + 1}:** {question}")
-            st.markdown(f"**💬 الإجابة:** {answer}")
+           
             
             previous_choice = None
             if st.session_state.index < len(st.session_state.annotations):
                 previous_choice = st.session_state.annotations[st.session_state.index][2]
             
-            urgency = st.radio("هل هذه الحالة عاجلة؟", ["عاجلة", "غير عاجلة", "لا أعلم" ],
-                              index=([ "عاجلة", "غير عاجلة", "لا أعلم"].index(previous_choice) if previous_choice else 0))
+            urgency = st.radio(هل هذا السؤال ؟", ["عاجل", "غير عاجل", "لا أعلم" ]",
+                              index=([ "عاجل", "غير عاجل", "لا أعلم"].index(previous_choice) if previous_choice else 0))
             
             col_prev, col_next = st.columns([1, 1])
             with col_prev:
@@ -99,7 +102,7 @@ else:
                     st.rerun()
         else:
             st.write("✅ جميع الأسئلة قد تم تصنيفها!")
-            annotated_df = pd.DataFrame(st.session_state.annotations, columns=["question", "answer", "Urgency"])
+            annotated_df = pd.DataFrame(st.session_state.annotations, columns=["question", "Urgency"])
             
             try:
                 sheet.append_rows(annotated_df.values.tolist())
