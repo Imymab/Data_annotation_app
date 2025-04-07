@@ -86,7 +86,7 @@ else:
             if st.session_state.index < len(st.session_state.annotations):
                 previous_choice = st.session_state.annotations[st.session_state.index][2]
             
-            urgency = st.radio(هل هذا السؤال ؟", ["عاجل", "غير عاجل", "لا أعلم" ]",
+            urgency = st.radio("هل هذا السؤال ؟", ["عاجل", "غير عاجل", "لا أعلم" ],
                               index=([ "عاجل", "غير عاجل", "لا أعلم"].index(previous_choice) if previous_choice else 0))
             
             col_prev, col_next = st.columns([1, 1])
