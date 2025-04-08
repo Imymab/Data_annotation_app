@@ -76,7 +76,7 @@ else:
         st.title("تصنيف الأسئلة الطبية")
         
         if st.session_state.index < len(df):
-            question = df.iloc[st.session_state.index]["Question"]
+            question = df.iloc[st.session_state.index]["Msa_questions"]
             
             
             st.markdown(f"**📝 السؤال {st.session_state.index + 1}:** {question}")
