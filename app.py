@@ -66,7 +66,7 @@ if not st.session_state.authenticated:
 else:
     sheet_name = st.session_state.doctor_sheet
     sheet = client.open_by_key(SHEET_ID).worksheet(sheet_name)
-    df = pd.read_excel("Altibbi_20_questions2.xlsx")
+    df = pd.read_excel("Altibbi_msa_20.xlsx")
     
     # Layout
     col1, col2, col3 = st.columns([1.5, 2, 1.5])
@@ -86,8 +86,8 @@ else:
             if st.session_state.index < len(st.session_state.annotations):
                 previous_choice = st.session_state.annotations[st.session_state.index][2]
             
-            urgency = st.radio("هل هذا السؤال ؟", ["عاجل", "غير عاجل", "لا أعلم" ],
-                              index=([ "عاجل", "غير عاجل", "لا أعلم"].index(previous_choice) if previous_choice else 0))
+            urgency = st.radio("هل هذا السؤال ؟", ["عاجل", "غير عاجل", "لا أعلم", "ليس بسؤال اسعافات اولية" ],
+                              index=([  "ليس بسؤال اسعافات اولية", "عاجل", "غير عاجل", "لا أعلم"].index(previous_choice) if previous_choice else 0))
             
             col_prev, col_next = st.columns([1, 1])
             with col_prev:
