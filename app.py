@@ -77,20 +77,16 @@ else:
         
         if st.session_state.index < len(df):
             question = df.iloc[st.session_state.index]["Msa_questions"]
-            
-            
             st.markdown(f"**📝 السؤال {st.session_state.index + 1}:** {question}")
            
-            
             previous_choice = None
             if st.session_state.index < len(st.session_state.annotations):
-                previous_choice = st.session_state.annotations[st.session_state.index][2]
-            
-            urgency = st.radio("هل هذا السؤال؟", 
-                   ["عاجل", "غير عاجل", "لا أعلم", "ليس بسؤال إسعافات أولية"], 
-                   index=(["عاجل", "غير عاجل", "لا أعلم", "ليس بسؤال إسعافات أولية"].index(previous_choice) 
-                          if previous_choice in ["عاجل", "غير عاجل", "لا أعلم", "ليس بسؤال إسعافات أولية"] 
-                          else 0))
+                if len(st.session_state.annotations[st.session_state.index]) > 2:
+                   previous_choice = st.session_state.annotations[st.session_state.index][2]
+
+            urgency_options = ["عاجل", "غير عاجل", "لا أعلم", "ليس بسؤال إسعافات أولية"]
+            urgency = st.radio("هل هذا السؤال؟", urgency_options, 
+                       index=(urgency_options.index(previous_choice) if previous_choice in urgency_options else 0))
 
             
             col_prev, col_next = st.columns([1, 1])
