@@ -124,4 +124,4 @@ else:
                     st.session_state.index += 1
                     st.rerun()
         else:
-            st.success("✅ جميع الأسئلة قد تم تصنيفها!")
+            st.success("✅ جميع الأسئلة قد تم تصنيفها! جزاكم الله خيرا")
