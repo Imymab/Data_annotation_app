@@ -71,7 +71,17 @@ else:
         "لا أعلم": -1
     }
 
-    urgency_options = list(urgency_mapping.keys())  # Extract labels
+    urgency_options = list(urgency_mapping.keys())
+
+    # ✅ Load previous annotations
+    existing_data = sheet.get_all_values()
+    header_offset = 0 if existing_data and "question" in existing_data[0] else 1
+    annotated_rows = existing_data[header_offset:]
+    st.session_state.index = len(annotated_rows)
+
+    # Display progress bar
+    progress = st.session_state.index / len(df)
+    st.progress(progress, text=f"تم تصنيف {st.session_state.index} من أصل {len(df)} سؤال")
 
     # Layout
     col1, col2, col3 = st.columns([1.5, 2, 1.5])
@@ -79,24 +89,21 @@ else:
         display_definitions()
     with col2:
         st.title("تصنيف الأسئلة الطبية")
-        
+
         if st.session_state.index < len(df):
             question = df.iloc[st.session_state.index]["Msa_questions"]
             st.markdown(f"**📝 السؤال {st.session_state.index + 1}:** {question}")
-           
-            # Retrieve previous choice safely
+
             previous_choice = None
             if st.session_state.index < len(st.session_state.annotations):
                 if len(st.session_state.annotations[st.session_state.index]) > 1:
-                   previous_choice = st.session_state.annotations[st.session_state.index][1]
+                    previous_choice = st.session_state.annotations[st.session_state.index][1]
 
-            # Radio button for annotation
-            urgency = st.radio("هل هذا السؤال؟", urgency_options, 
+            urgency = st.radio("هل هذا السؤال؟", urgency_options,
                                index=(urgency_options.index(previous_choice) if previous_choice in urgency_options else 0))
 
-            urgency_value = urgency_mapping[urgency]  # Convert label to number
+            urgency_value = urgency_mapping[urgency]
 
-            # Buttons for navigation
             col_prev, col_next = st.columns([1, 1])
             with col_prev:
                 if st.button("➡️ السؤال السابق", disabled=(st.session_state.index == 0)):
@@ -104,24 +111,17 @@ else:
                     st.rerun()
             with col_next:
                 if st.button("⬅️ إرسال والانتقال للسؤال التالي"):
+                    row = [question, urgency_value]
+
                     if st.session_state.index < len(st.session_state.annotations):
-                        st.session_state.annotations[st.session_state.index] = [question, urgency_value]
+                        st.session_state.annotations[st.session_state.index] = row
                     else:
-                        st.session_state.annotations.append([question, urgency_value])
+                        st.session_state.annotations.append(row)
+
+                    # ✅ Immediately save to Google Sheets
+                    sheet.append_row(row)
 
                     st.session_state.index += 1
                     st.rerun()
         else:
-            st.write("✅ جميع الأسئلة قد تم تصنيفها!")
-            annotated_df = pd.DataFrame(st.session_state.annotations, columns=["question", "Urgency"])
-
-            try:
-                sheet.append_rows(annotated_df.values.tolist())  # Save to Google Sheets
-                st.success("✅ جزاكم الله خيرا على مساهمتكم!")
-            except Exception as e:
-                st.error(f"❌ خطأ أثناء حفظ البيانات: {e}")
-
-            if st.button("🔄 البدء من جديد"):
-                st.session_state.index = 0
-                st.session_state.annotations = []
-                st.rerun()
+            st.success("✅ جميع الأسئلة قد تم تصنيفها!")
