@@ -105,21 +105,28 @@ else:
             question = df.iloc[st.session_state.index]["Msa_questions"]
             st.markdown(f"**📝 السؤال {st.session_state.index + 1}:** {question}")
 
+            # Try to retrieve previous answer from session or sheet
             previous_choice = None
             if st.session_state.index < len(st.session_state.annotations):
-                if len(st.session_state.annotations[st.session_state.index]) > 1:
-                    previous_choice = st.session_state.annotations[st.session_state.index][1]
+                val = st.session_state.annotations[st.session_state.index][1]
+                previous_choice = [k for k, v in urgency_mapping.items() if v == int(val)][0]
+            elif st.session_state.index + header_offset < len(existing_data):
+                val = existing_data[st.session_state.index + header_offset][1]
+                previous_choice = [k for k, v in urgency_mapping.items() if v == int(val)][0]
 
+            # Radio button for selection
             urgency = st.radio("هل هذا السؤال؟", urgency_options,
                                index=(urgency_options.index(previous_choice) if previous_choice in urgency_options else 0))
-
             urgency_value = urgency_mapping[urgency]
 
+            # Navigation buttons
             col_prev, col_next = st.columns([1, 1])
             with col_prev:
                 if st.button("➡️ السؤال السابق", disabled=(st.session_state.index == 0)):
+                    # Just go back, don't save
                     st.session_state.index -= 1
                     st.rerun()
+
             with col_next:
                 if st.button("⬅️ إرسال والانتقال للسؤال التالي"):
                     row = [question, urgency_value]
@@ -129,10 +136,11 @@ else:
                     else:
                         st.session_state.annotations.append(row)
 
-                    # ✅ Immediately save to Google Sheets
-                    sheet.append_row(row)
+                    # Save only if it's not already saved
+                    if st.session_state.index + header_offset < len(existing_data):
+                        sheet.update(f"A{st.session_state.index+2}", [row])
+                    else:
+                        sheet.append_row(row)
 
                     st.session_state.index += 1
                     st.rerun()
-        else:
-            st.success("✅ جميع الأسئلة قد تم تصنيفها! جزاكم الله خيرا")
