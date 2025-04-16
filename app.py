@@ -24,7 +24,6 @@ def display_definitions():
     الإسعافات الأولية هي الرعاية الطبية الفورية التي تُقدَّم لشخص مصاب أو مريض بشكل مفاجئ قبل وصول المساعدة الطبية المتخصصة 🚑. تهدف إلى:
     - ✔️ إنقاذ الحياة 🏥
     - ✔️ منع تفاقم الحالة الصحية ⚠️
-    
     """, unsafe_allow_html=True)
 
 # ---- Authentication ----
@@ -53,6 +52,7 @@ if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 if "index" not in st.session_state:
     st.session_state.index = 0
+if "annotations" not in st.session_state:
     st.session_state.annotations = []
 
 # ---- Authenticate Doctor ----
@@ -66,22 +66,28 @@ else:
 
     # Define urgency options with numerical mapping
     urgency_mapping = {
-        "   سؤال إسعافات أولية   ": 1,
-        "   ليس سؤال إسعافات أولية   ": 0,
-        "   لا أعلم   ": -1
+        "سؤال إسعافات أولية": 1,
+        "ليس سؤال إسعافات أولية": 0,
+        "لا أعلم": -1
     }
-
     urgency_options = list(urgency_mapping.keys())
 
-    # ✅ Load previous annotations
+    # Load existing rows and set current index
     existing_data = sheet.get_all_values()
     header_offset = 0 if existing_data and "question" in existing_data[0] else 1
-    annotated_rows = existing_data[header_offset:]
-    st.session_state.index = len(annotated_rows)
+    st.session_state.index = len(existing_data[header_offset:])
 
-    # Display progress bar
+    # Custom right-to-left progress bar
     progress = st.session_state.index / len(df)
-    st.progress(progress, text=f"تم تصنيف {st.session_state.index} من أصل {len(df)} سؤال")
+    percentage = int(progress * 100)
+    st.markdown(f"""
+    <div style="direction: rtl; text-align: right">
+        <p>تم تصنيف {st.session_state.index} من أصل {len(df)} سؤال</p>
+        <div style="width: 100%; background-color: #f0f0f0; border-radius: 10px; height: 25px;">
+            <div style="width: {percentage}%; background-color: #4CAF50; height: 100%; border-radius: 10px 0 0 10px; float: right;"></div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     # Layout
     col1, col2, col3 = st.columns([1.5, 2, 1.5])
@@ -94,6 +100,7 @@ else:
             question = df.iloc[st.session_state.index]["Msa_questions"]
             st.markdown(f"**📝 السؤال {st.session_state.index + 1}:** {question}")
 
+            # Retrieve previous choice
             previous_choice = None
             if st.session_state.index < len(st.session_state.annotations):
                 if len(st.session_state.annotations[st.session_state.index]) > 1:
@@ -101,7 +108,6 @@ else:
 
             urgency = st.radio("هل هذا السؤال؟", urgency_options,
                                index=(urgency_options.index(previous_choice) if previous_choice in urgency_options else 0))
-
             urgency_value = urgency_mapping[urgency]
 
             col_prev, col_next = st.columns([1, 1])
@@ -118,8 +124,12 @@ else:
                     else:
                         st.session_state.annotations.append(row)
 
-                    # ✅ Immediately save to Google Sheets
-                    sheet.append_row(row)
+                    # Save or update in Google Sheets
+                    existing_rows = len(existing_data[header_offset:])
+                    if st.session_state.index < existing_rows:
+                        sheet.update(f"A{st.session_state.index+2}", [[question, urgency_value]])
+                    else:
+                        sheet.append_row(row)
 
                     st.session_state.index += 1
                     st.rerun()
