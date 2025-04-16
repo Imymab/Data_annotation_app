@@ -133,11 +133,11 @@ else:
             col_prev, col_next = st.columns([1, 1])
             with col_prev:
                 if st.button("➡️ السؤال السابق", disabled=(st.session_state.index == 0)):
-                    st.session_state.index -= 2
+                    st.session_state.index -= 0
                     st.rerun()
             with col_next:
                 if st.button("⬅️ إرسال والانتقال للسؤال التالي"):
-                    st.session_state.index += 2
+                    st.session_state.index += 1
                     st.rerun()
         else:
             st.success("✅ جميع الأسئلة قد تم تصنيفها! جزاكم الله خيرا")
