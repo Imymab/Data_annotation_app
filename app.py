@@ -117,7 +117,7 @@ else:
             row = [question, urgency_value]
 
             # Save/Update Google Sheet
-            row_number = st.session_state.index + 2
+            row_number = st.session_state.index + 1
             if st.session_state.index < len(existing_data) - header_offset:
                 sheet.update(f"A{row_number}:B{row_number}", [row])
             else:
