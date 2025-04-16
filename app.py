@@ -66,9 +66,9 @@ else:
 
     # Define urgency options with numerical mapping
     urgency_mapping = {
-        " سؤال إسعافات أولية": 1,
-        " ليس سؤال إسعافات أولية": 0,
-        " لا أعلم": -1
+        " سؤال إسعافات أولية ": 1,
+        " ليس سؤال إسعافات أولية ": 0,
+        " لا أعلم ": -1
     }
 
     urgency_options = list(urgency_mapping.keys())
