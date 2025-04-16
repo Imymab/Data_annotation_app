@@ -137,7 +137,7 @@ else:
                     st.rerun()
             with col_next:
                 if st.button("⬅️ إرسال والانتقال للسؤال التالي"):
-                    st.session_state.index += 1
+                    st.session_state.index += 0
                     st.rerun()
         else:
             st.success("✅ جميع الأسئلة قد تم تصنيفها! جزاكم الله خيرا")
