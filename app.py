@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+from streamlit_extras.colored_header import colored_header
 
 # ---- Google Sheets Authentication ----
 SERVICE_ACCOUNT_FILE = st.secrets["service_account"]
@@ -23,6 +24,7 @@ def display_definitions():
     الإسعافات الأولية هي الرعاية الطبية الفورية التي تُقدَّم لشخص مصاب أو مريض بشكل مفاجئ قبل وصول المساعدة الطبية المتخصصة 🚑. تهدف إلى:
     - ✔️ إنقاذ الحياة 🏥
     - ✔️ منع تفاقم الحالة الصحية ⚠️
+    
     """, unsafe_allow_html=True)
 
 # ---- Authentication ----
@@ -51,7 +53,6 @@ if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 if "index" not in st.session_state:
     st.session_state.index = 0
-if "annotations" not in st.session_state:
     st.session_state.annotations = []
 
 # ---- Authenticate Doctor ----
@@ -65,18 +66,22 @@ else:
 
     # Define urgency options with numerical mapping
     urgency_mapping = {
-        "سؤال إسعافات أولية": 1,
-        "ليس سؤال إسعافات أولية": 0,
-        "لا أعلم": -1
+        "   سؤال إسعافات أولية   ": 1,
+        "   ليس سؤال إسعافات أولية   ": 0,
+        "   لا أعلم   ": -1
     }
+
     urgency_options = list(urgency_mapping.keys())
 
-    # Load existing annotations
+    # ✅ Load previous annotations
     existing_data = sheet.get_all_values()
     header_offset = 0 if existing_data and "question" in existing_data[0] else 1
-    st.session_state.annotations = existing_data[header_offset:]
-    st.session_state.index = min(len(st.session_state.annotations), len(df))
+    annotated_rows = existing_data[header_offset:]
+    st.session_state.index = len(annotated_rows)
 
+
+
+    
     # Custom right-to-left progress bar (thinner)
     progress = st.session_state.index / len(df)
     percentage = int(progress * 100)
@@ -88,7 +93,7 @@ else:
         </div>
     </div>
     """, unsafe_allow_html=True)
-
+    
     # Layout
     col1, col2, col3 = st.columns([1.5, 2, 1.5])
     with col1:
@@ -102,42 +107,32 @@ else:
 
             previous_choice = None
             if st.session_state.index < len(st.session_state.annotations):
-                try:
-                    val = st.session_state.annotations[st.session_state.index][1]
-                    for label, num in urgency_mapping.items():
-                        if str(val) == str(num):
-                            previous_choice = label
-                            break
-                except IndexError:
-                    previous_choice = None
+                if len(st.session_state.annotations[st.session_state.index]) > 1:
+                    previous_choice = st.session_state.annotations[st.session_state.index][1]
 
             urgency = st.radio("هل هذا السؤال؟", urgency_options,
                                index=(urgency_options.index(previous_choice) if previous_choice in urgency_options else 0))
+
             urgency_value = urgency_mapping[urgency]
-            row = [question, urgency_value]
 
-            # Save/Update Google Sheet
-            row_number = st.session_state.index + 1
-            if st.session_state.index < len(existing_data) - header_offset:
-                sheet.update(f"A{row_number}:B{row_number}", [row])
-            else:
-                sheet.append_row(row)
-
-            # Update local session
-            if st.session_state.index < len(st.session_state.annotations):
-                st.session_state.annotations[st.session_state.index] = row
-            else:
-                st.session_state.annotations.append(row)
-
-            # Navigation
             col_prev, col_next = st.columns([1, 1])
             with col_prev:
                 if st.button("➡️ السؤال السابق", disabled=(st.session_state.index == 0)):
-                    st.session_state.index -= 0
+                    st.session_state.index -= 1
                     st.rerun()
             with col_next:
                 if st.button("⬅️ إرسال والانتقال للسؤال التالي"):
-                    st.session_state.index += 0
+                    row = [question, urgency_value]
+
+                    if st.session_state.index < len(st.session_state.annotations):
+                        st.session_state.annotations[st.session_state.index] = row
+                    else:
+                        st.session_state.annotations.append(row)
+
+                    # ✅ Immediately save to Google Sheets
+                    sheet.append_row(row)
+
+                    st.session_state.index += 1
                     st.rerun()
         else:
             st.success("✅ جميع الأسئلة قد تم تصنيفها! جزاكم الله خيرا")
