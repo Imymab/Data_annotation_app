@@ -77,14 +77,11 @@ else:
     header_offset = 0 if existing_data and "question" in existing_data[0] else 1
     existing_rows = existing_data[header_offset:]
 
-    # Set annotations in session state
-    if "annotations" not in st.session_state:
-       st.session_state.annotations = existing_rows
-
-    # Set current index once
-    if "index" not in st.session_state:
-       st.session_state.index = len(existing_rows)
-        
+    if not st.session_state.annotations:
+    st.session_state.annotations = existing_data[header_offset:]
+    if "index_set" not in st.session_state:
+        st.session_state.index = len(st.session_state.annotations)
+        st.session_state.index_set = True
 
 
 
