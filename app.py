@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-from streamlit_extras.colored_header import colored_header
 
 # ---- Google Sheets Authentication ----
 SERVICE_ACCOUNT_FILE = st.secrets["service_account"]
@@ -24,7 +23,6 @@ def display_definitions():
     الإسعافات الأولية هي الرعاية الطبية الفورية التي تُقدَّم لشخص مصاب أو مريض بشكل مفاجئ قبل وصول المساعدة الطبية المتخصصة 🚑. تهدف إلى:
     - ✔️ إنقاذ الحياة 🏥
     - ✔️ منع تفاقم الحالة الصحية ⚠️
-    
     """, unsafe_allow_html=True)
 
 # ---- Authentication ----
@@ -53,6 +51,7 @@ if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 if "index" not in st.session_state:
     st.session_state.index = 0
+if "annotations" not in st.session_state:
     st.session_state.annotations = []
 
 # ---- Authenticate Doctor ----
@@ -66,34 +65,29 @@ else:
 
     # Define urgency options with numerical mapping
     urgency_mapping = {
-        "   سؤال إسعافات أولية   ": 1,
-        "   ليس سؤال إسعافات أولية   ": 0,
-        "   لا أعلم   ": -1
+        "سؤال إسعافات أولية": 1,
+        "ليس سؤال إسعافات أولية": 0,
+        "لا أعلم": -1
     }
-
     urgency_options = list(urgency_mapping.keys())
 
-    # ✅ Load previous annotations
+    # Load existing annotations
     existing_data = sheet.get_all_values()
     header_offset = 0 if existing_data and "question" in existing_data[0] else 1
-    annotated_rows = existing_data[header_offset:]
-    st.session_state.index = len(annotated_rows)
+    st.session_state.index = len(existing_data[header_offset:])
 
-
-
-    
-    # Custom right-to-left progress bar (thinner)
+    # Custom right-to-left progress bar
     progress = st.session_state.index / len(df)
     percentage = int(progress * 100)
     st.markdown(f"""
     <div style="direction: rtl; text-align: right">
         <p>تم تصنيف {st.session_state.index} من أصل {len(df)} سؤال</p>
-        <div style="width: 100%; background-color: #f0f0f0; border-radius: 10px; height: 10px;">
+        <div style="width: 100%; background-color: #f0f0f0; border-radius: 10px; height: 25px;">
             <div style="width: {percentage}%; background-color: #4CAF50; height: 100%; border-radius: 10px 0 0 10px; float: right;"></div>
         </div>
     </div>
     """, unsafe_allow_html=True)
-    
+
     # Layout
     col1, col2, col3 = st.columns([1.5, 2, 1.5])
     with col1:
@@ -105,42 +99,41 @@ else:
             question = df.iloc[st.session_state.index]["Msa_questions"]
             st.markdown(f"**📝 السؤال {st.session_state.index + 1}:** {question}")
 
-            # Try to retrieve previous answer from session or sheet
             previous_choice = None
             if st.session_state.index < len(st.session_state.annotations):
-                val = st.session_state.annotations[st.session_state.index][1]
-                previous_choice = [k for k, v in urgency_mapping.items() if v == int(val)][0]
+                previous_choice = st.session_state.annotations[st.session_state.index][1]
             elif st.session_state.index + header_offset < len(existing_data):
-                val = existing_data[st.session_state.index + header_offset][1]
-                previous_choice = [k for k, v in urgency_mapping.items() if v == int(val)][0]
+                prev_val = existing_data[st.session_state.index + header_offset][1]
+                for k, v in urgency_mapping.items():
+                    if str(v) == prev_val:
+                        previous_choice = k
 
-            # Radio button for selection
             urgency = st.radio("هل هذا السؤال؟", urgency_options,
                                index=(urgency_options.index(previous_choice) if previous_choice in urgency_options else 0))
             urgency_value = urgency_mapping[urgency]
+            row = [question, urgency_value]
+
+            # Save answer every time
+            if st.session_state.index + header_offset < len(existing_data):
+                sheet.update(f"A{st.session_state.index+2}", [row])
+            else:
+                sheet.append_row(row)
+
+            # Update local session state
+            if st.session_state.index < len(st.session_state.annotations):
+                st.session_state.annotations[st.session_state.index] = row
+            else:
+                st.session_state.annotations.append(row)
 
             # Navigation buttons
             col_prev, col_next = st.columns([1, 1])
             with col_prev:
                 if st.button("➡️ السؤال السابق", disabled=(st.session_state.index == 0)):
-                    # Just go back, don't save
                     st.session_state.index -= 1
                     st.rerun()
-
             with col_next:
                 if st.button("⬅️ إرسال والانتقال للسؤال التالي"):
-                    row = [question, urgency_value]
-
-                    if st.session_state.index < len(st.session_state.annotations):
-                        st.session_state.annotations[st.session_state.index] = row
-                    else:
-                        st.session_state.annotations.append(row)
-
-                    # Save only if it's not already saved
-                    if st.session_state.index + header_offset < len(existing_data):
-                        sheet.update(f"A{st.session_state.index+2}", [row])
-                    else:
-                        sheet.append_row(row)
-
                     st.session_state.index += 1
                     st.rerun()
+        else:
+            st.success("✅ جميع الأسئلة قد تم تصنيفها! جزاكم الله خيرا")
