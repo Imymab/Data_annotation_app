@@ -74,15 +74,16 @@ else:
     # Load existing annotations
     existing_data = sheet.get_all_values()
     header_offset = 0 if existing_data and "question" in existing_data[0] else 1
-    st.session_state.index = len(existing_data[header_offset:])
+    st.session_state.annotations = existing_data[header_offset:]
+    st.session_state.index = min(len(st.session_state.annotations), len(df))
 
-    # Custom right-to-left progress bar
+    # Custom right-to-left progress bar (thinner)
     progress = st.session_state.index / len(df)
     percentage = int(progress * 100)
     st.markdown(f"""
     <div style="direction: rtl; text-align: right">
         <p>تم تصنيف {st.session_state.index} من أصل {len(df)} سؤال</p>
-        <div style="width: 100%; background-color: #f0f0f0; border-radius: 10px; height: 25px;">
+        <div style="width: 100%; background-color: #f0f0f0; border-radius: 10px; height: 10px;">
             <div style="width: {percentage}%; background-color: #4CAF50; height: 100%; border-radius: 10px 0 0 10px; float: right;"></div>
         </div>
     </div>
@@ -101,31 +102,34 @@ else:
 
             previous_choice = None
             if st.session_state.index < len(st.session_state.annotations):
-                previous_choice = st.session_state.annotations[st.session_state.index][1]
-            elif st.session_state.index + header_offset < len(existing_data):
-                prev_val = existing_data[st.session_state.index + header_offset][1]
-                for k, v in urgency_mapping.items():
-                    if str(v) == prev_val:
-                        previous_choice = k
+                try:
+                    val = st.session_state.annotations[st.session_state.index][1]
+                    for label, num in urgency_mapping.items():
+                        if str(val) == str(num):
+                            previous_choice = label
+                            break
+                except IndexError:
+                    previous_choice = None
 
             urgency = st.radio("هل هذا السؤال؟", urgency_options,
                                index=(urgency_options.index(previous_choice) if previous_choice in urgency_options else 0))
             urgency_value = urgency_mapping[urgency]
             row = [question, urgency_value]
 
-            # Save answer every time
-            if st.session_state.index + header_offset < len(existing_data):
-                sheet.update(f"A{st.session_state.index+2}", [row])
+            # Save/Update Google Sheet
+            row_number = st.session_state.index + 2
+            if st.session_state.index < len(existing_data) - header_offset:
+                sheet.update(f"A{row_number}:B{row_number}", [row])
             else:
                 sheet.append_row(row)
 
-            # Update local session state
+            # Update local session
             if st.session_state.index < len(st.session_state.annotations):
                 st.session_state.annotations[st.session_state.index] = row
             else:
                 st.session_state.annotations.append(row)
 
-            # Navigation buttons
+            # Navigation
             col_prev, col_next = st.columns([1, 1])
             with col_prev:
                 if st.button("➡️ السؤال السابق", disabled=(st.session_state.index == 0)):
