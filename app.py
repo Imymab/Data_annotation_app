@@ -78,8 +78,8 @@ else:
     existing_rows = existing_data[header_offset:]
 
     if not st.session_state.annotations:
-    st.session_state.annotations = existing_data[header_offset:]
-    if "index_set" not in st.session_state:
+      st.session_state.annotations = existing_data[header_offset:]
+      if "index_set" not in st.session_state:
         st.session_state.index = len(st.session_state.annotations)
         st.session_state.index_set = True
 
