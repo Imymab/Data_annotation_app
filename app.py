@@ -72,12 +72,19 @@ else:
     urgency_options = list(urgency_mapping.keys())
 
     # Load existing annotations
+   
     existing_data = sheet.get_all_values()
     header_offset = 0 if existing_data and "question" in existing_data[0] else 1
-    if not st.session_state.annotations:
-      st.session_state.annotations = existing_data[header_offset:]
+    loaded_annotations = existing_data[header_offset:]
+
+    # ✅ Initialize annotations only once
+    if "annotations" not in st.session_state:
+        st.session_state.annotations = loaded_annotations
+
+    # ✅ Initialize index only once
     if "index" not in st.session_state:
         st.session_state.index = len(st.session_state.annotations)
+
         
 
 
