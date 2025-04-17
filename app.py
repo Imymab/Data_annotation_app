@@ -76,19 +76,15 @@ else:
     existing_data = sheet.get_all_values()
     header_offset = 0 if existing_data and "question" in existing_data[0] else 1
     annotations_data = existing_data[header_offset:]
-
+    if not st.session_state.annotations:
+       st.session_state.annotations = existing_data[header_offset:]
     # Load index from D1 if available
-    if "index" not in st.session_state:
-       try:
-         saved_index = int(sheet.acell("D1").value)
-         st.session_state.index = saved_index
-       except:
-         st.session_state.index = len(annotations_data)
-
-    # Store annotations
-    if "annotations" not in st.session_state:
-         st.session_state.annotations = annotations_data
-
+     if "index" not in st.session_state:
+        try:
+          saved_index = int(sheet.acell("D1").value)
+          st.session_state.index = saved_index
+        except:
+          st.session_state.index = len(annotations_data)
 
 
     # Custom right-to-left progress bar (thinner)
