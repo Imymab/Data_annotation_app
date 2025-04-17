@@ -86,7 +86,7 @@ else:
          st.session_state.index = len(annotations_data)
 
     # Store annotations
-       if "annotations" not in st.session_state:
+    if "annotations" not in st.session_state:
          st.session_state.annotations = annotations_data
 
 
