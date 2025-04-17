@@ -91,13 +91,6 @@ else:
 
 
 
-        
-
-
-
-
-
-
     # Custom right-to-left progress bar (thinner)
     progress = st.session_state.index / len(df)
     percentage = int(progress * 100)
@@ -159,7 +152,7 @@ else:
             with col_next:
                 if st.button("⬅️ إرسال والانتقال للسؤال التالي"):
                     row_number = st.session_state.index + 2
-                    if st.session_state.index < len(existing_rows):
+                    if st.session_state.index < len(annotations_data):
                         sheet.update(f"A{row_number}:B{row_number}", [row])
                     else:
                         sheet.append_row(row)
@@ -173,7 +166,6 @@ else:
                     # Save current index to D1 (resume functionality)
                     sheet.update_acell("D1", str(st.session_state.index))
 
-                    
                     st.rerun()
 
         else:
