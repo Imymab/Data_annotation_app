@@ -76,9 +76,9 @@ else:
     header_offset = 0 if existing_data and "question" in existing_data[0] else 1
     if not st.session_state.annotations:
       st.session_state.annotations = existing_data[header_offset:]
-      if "index_set" not in st.session_state:
+    if "index" not in st.session_state:
         st.session_state.index = len(st.session_state.annotations)
-        st.session_state.index_set = True
+        
 
 
 
