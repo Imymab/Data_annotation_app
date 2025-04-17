@@ -75,10 +75,15 @@ else:
    
     existing_data = sheet.get_all_values()
     header_offset = 0 if existing_data and "question" in existing_data[0] else 1
-    if not st.session_state.annotations:
-      st.session_state.annotations = existing_data[header_offset:]
-      if "index_set" not in st.session_state:
-        st.session_state.index = len(st.session_state.annotations)
+    existing_rows = existing_data[header_offset:]
+
+    # Set annotations in session state
+    if "annotations" not in st.session_state:
+       st.session_state.annotations = existing_rows
+
+    # Set current index once
+    if "index" not in st.session_state:
+       st.session_state.index = len(existing_rows)
         
 
 
@@ -151,7 +156,18 @@ else:
                     st.rerun()
             with col_next:
                 if st.button("⬅️ إرسال والانتقال للسؤال التالي"):
+                    row_number = st.session_state.index + 2
+                    if st.session_state.index < len(existing_rows):
+                        sheet.update(f"A{row_number}:B{row_number}", [row])
+                    else:
+                        sheet.append_row(row)
+                    if st.session_state.index < len(st.session_state.annotations):
+                       st.session_state.annotations[st.session_state.index] = row
+                    else:
+                       st.session_state.annotations.append(row)
+
                     st.session_state.index += 1
                     st.rerun()
+
         else:
             st.success("✅ جميع الأسئلة قد تم تصنيفها! جزاكم الله خيرا")
