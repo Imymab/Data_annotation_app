@@ -77,19 +77,14 @@ else:
     header_offset = 0 if existing_data and "question" in existing_data[0] else 1
     existing_rows = existing_data[header_offset:]
 
-    # Set annotations and index based on what's already stored
-    if not st.session_state.get("annotations"):
-       st.session_state.annotations = existing_rows
-       st.session_state.index = len(existing_rows) - header_offset 
-
-
-
-
-        
-
-
-
-
+    # ✅ Handle empty sheet (only header or nothing)
+   if not existing_rows:
+       st.session_state.annotations = []
+       st.session_state.index = 0
+   else:
+       if not st.session_state.get("annotations"):
+         st.session_state.annotations = existing_rows
+         st.session_state.index = len(existing_rows)
 
 
     # Custom right-to-left progress bar (thinner)
