@@ -84,7 +84,7 @@ else:
     else:
        if not st.session_state.get("annotations"):
          st.session_state.annotations = existing_rows
-         st.session_state.index = len(existing_rows) 
+         st.session_state.index = len(existing_rows) - header_offset
 
 
     # Custom right-to-left progress bar (thinner)
