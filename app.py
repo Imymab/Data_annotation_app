@@ -51,6 +51,7 @@ if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 if "index" not in st.session_state:
     st.session_state.index = 0
+    sheet.update_acell("D1", "0")
 if "annotations" not in st.session_state:
     st.session_state.annotations = []
 
@@ -81,7 +82,7 @@ else:
     # Load index from D1 if available
        saved_index = sheet.acell("D1").value
        st.session_state.index = saved_index
-
+       
 
     # Custom right-to-left progress bar (thinner)
     progress = st.session_state.index / len(df)
