@@ -74,7 +74,7 @@ else:
     # Load existing annotations
    
     existing_data = sheet.get_all_values()
-    header_offset = 0 
+    header_offset = 0 if existing_data and "question" in existing_data[0] else 1 
     annotations_data = existing_data[header_offset:]
     if not st.session_state.annotations:
        st.session_state.annotations = existing_data[header_offset:]
@@ -84,8 +84,8 @@ else:
 
 
     # Custom right-to-left progress bar (thinner)
-    progress = int(st.session_state.index) / len(df)
-    percentage = progress * 100
+    progress = st.session_state.index / len(df)
+    percentage = int(progress * 100)
     st.markdown(f"""
     <div style="direction: rtl; text-align: right">
         <p>تم تصنيف {st.session_state.index} من أصل {len(df)} سؤال</p>
@@ -122,7 +122,7 @@ else:
             urgency_value = urgency_mapping[urgency]
             row = [question, urgency_value]
 
-            # Save/Update Google Sheet
+            
             
             # Update local session
             if st.session_state.index < len(st.session_state.annotations):
@@ -130,11 +130,13 @@ else:
             else:
                 st.session_state.annotations.append(row)
 
-            row_number = st.session_state.index + 2
+            # Save/Update Google Sheet
+            row_number = st.session_state.index + 1
             if st.session_state.index < len(existing_data) - header_offset:
                 sheet.update(f"A{row_number}:B{row_number}", [row])
             else:
                 sheet.append_row(row)
+            
             # Navigation
             col_prev, col_next = st.columns([1, 1])
             with col_prev:
