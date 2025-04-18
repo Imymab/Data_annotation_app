@@ -77,20 +77,21 @@ else:
     header_offset = 0 if existing_data and "question" in existing_data[0] else 1
     existing_rows = existing_data[header_offset:]
 
-    if not st.session_state.annotations:
-      st.session_state.annotations = existing_data[header_offset:]
-      if "index_set" not in st.session_state:
-        st.session_state.index = len(st.session_state.annotations)
-        st.session_state.index_set = True
+ 
 
+# Load progress index from cell D9
+    try:
+        saved_index_cell = sheet.acell("D9").value
+        saved_index = int(saved_index_cell) if saved_index_cell else 0
+    except:
+        saved_index = 0
 
+# Initialize session state from sheet
+    if "annotations" not in st.session_state:
+       st.session_state.annotations = existing_rows
 
-
-        
-
-
-
-
+    if "index" not in st.session_state:
+       st.session_state.index = saved_index
 
 
     # Custom right-to-left progress bar (thinner)
@@ -114,7 +115,7 @@ else:
 
         if st.session_state.index < len(df):
             question = df.iloc[st.session_state.index]["Msa_questions"]
-            st.markdown(f"**📝 السؤال {st.session_state.index}:** {question}")
+            st.markdown(f"**📝 السؤال {st.session_state.index +1}:** {question}")
 
             previous_choice = None
             if st.session_state.index < len(st.session_state.annotations):
@@ -150,6 +151,8 @@ else:
             with col_prev:
                 if st.button("➡️ السؤال السابق", disabled=(st.session_state.index == 0)):
                     st.session_state.index -= 1
+                    # Save current index to D9
+                    sheet.update_acell("D9", str(st.session_state.index))
                     st.rerun()
             with col_next:
                 if st.button("⬅️ إرسال والانتقال للسؤال التالي"):
@@ -164,6 +167,9 @@ else:
                        st.session_state.annotations.append(row)
 
                     st.session_state.index += 1
+                    # Save current index to D9
+                    sheet.update_acell("D9", str(st.session_state.index))
+
                     st.rerun()
 
         else:
