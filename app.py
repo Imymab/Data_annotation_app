@@ -75,19 +75,14 @@ else:
    
     existing_data = sheet.get_all_values()
     header_offset = 0 if existing_data and "question" in existing_data[0] else 1
-    annotations_data = existing_data[header_offset:]
+    existing_rows = existing_data[header_offset:]
 
-    # Load index from D1 if available
-    if "index" not in st.session_state:
-       try:
-         saved_index = int(sheet.acell("D1").value)
-         st.session_state.index = saved_index
-       except:
-         st.session_state.index = len(annotations_data)
+    if not st.session_state.annotations:
+      st.session_state.annotations = existing_data[header_offset:]
+      if "index_set" not in st.session_state:
+        st.session_state.index = len(st.session_state.annotations)
+        st.session_state.index_set = True
 
-    # Store annotations
-       if "annotations" not in st.session_state:
-         st.session_state.annotations = annotations_data
 
 
 
@@ -169,11 +164,6 @@ else:
                        st.session_state.annotations.append(row)
 
                     st.session_state.index += 1
-
-                    # Save current index to D1 (resume functionality)
-                    sheet.update_acell("D1", str(st.session_state.index))
-
-                    
                     st.rerun()
 
         else:
