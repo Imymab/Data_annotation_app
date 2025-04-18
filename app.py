@@ -78,13 +78,13 @@ else:
     existing_rows = existing_data[header_offset:]
 
     # ✅ Handle empty sheet (only header or nothing)
-   if not existing_rows:
+    if not existing_rows:
        st.session_state.annotations = []
        st.session_state.index = 0
-   else:
+    else:
        if not st.session_state.get("annotations"):
          st.session_state.annotations = existing_rows
-         st.session_state.index = len(existing_rows)
+         st.session_state.index = len(existing_rows) -header_offset
 
 
     # Custom right-to-left progress bar (thinner)
