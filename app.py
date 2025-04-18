@@ -114,7 +114,7 @@ else:
 
         if st.session_state.index < len(df):
             question = df.iloc[st.session_state.index]["Msa_questions"]
-            st.markdown(f"**📝 السؤال {st.session_state.index + 1}:** {question}")
+            st.markdown(f"**📝 السؤال {st.session_state.index}:** {question}")
 
             previous_choice = None
             if st.session_state.index < len(st.session_state.annotations):
