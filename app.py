@@ -143,16 +143,17 @@ else:
                     st.rerun()
             with col_next:
                 if st.button("⬅️ إرسال والانتقال للسؤال التالي"):
-                    row_number = st.session_state.index + 2
-                    if st.session_state.index < len(annotations_data):
-                        sheet.update(f"A{row_number}:B{row_number}", [row])
-                    else:
-                        sheet.append_row(row)
+                    row_number = st.session_state.index + 1
                     if st.session_state.index < len(st.session_state.annotations):
                        st.session_state.annotations[st.session_state.index] = row
                     else:
                        st.session_state.annotations.append(row)
-
+                    
+                    if st.session_state.index < len(annotations_data):
+                        sheet.update(f"A{row_number}:B{row_number}", [row])
+                    else:
+                        sheet.append_row(row)
+                        
                     st.session_state.index += 1
 
                     # Save current index to D1 (resume functionality)
