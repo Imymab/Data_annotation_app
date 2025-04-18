@@ -84,7 +84,7 @@ else:
 
 
     # Custom right-to-left progress bar (thinner)
-    progress = st.session_state.index / len(df)
+    progress = int(st.session_state.index) / len(df)
     percentage = progress * 100
     st.markdown(f"""
     <div style="direction: rtl; text-align: right">
