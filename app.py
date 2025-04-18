@@ -79,7 +79,7 @@ else:
     if not st.session_state.annotations:
        st.session_state.annotations = existing_data[header_offset:]
     # Load index from D1 if available
-       saved_index = int(sheet.acell("D1").value)
+       saved_index = sheet.acell("D1").value
        st.session_state.index = saved_index
 
 
