@@ -80,11 +80,9 @@ else:
  
 
 # Load progress index from cell D9
-    try:
-        saved_index_cell = sheet.acell("D9").value
-        saved_index = int(saved_index_cell) if saved_index_cell else 0
-    except:
-        saved_index = 0
+    
+     saved_index_cell = sheet.acell("D9").value
+     saved_index = int(saved_index_cell) if saved_index_cell else 0
 
 # Initialize session state from sheet
     if "annotations" not in st.session_state:
