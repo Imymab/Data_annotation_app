@@ -80,7 +80,7 @@ else:
     # Set annotations and index based on what's already stored
     if not st.session_state.get("annotations"):
        st.session_state.annotations = existing_rows
-       st.session_state.index = len(existing_rows)
+       st.session_state.index = len(existing_rows) - header_offset 
 
 
 
