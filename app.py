@@ -85,7 +85,7 @@ else:
 
     # Custom right-to-left progress bar (thinner)
     progress = st.session_state.index / len(df)
-    percentage = int(progress * 100)
+    percentage = progress * 100
     st.markdown(f"""
     <div style="direction: rtl; text-align: right">
         <p>تم تصنيف {st.session_state.index} من أصل {len(df)} سؤال</p>
