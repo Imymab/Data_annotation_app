@@ -86,8 +86,15 @@ else:
          st.session_state.index = len(annotations_data)
 
     # Store annotations
-    if "annotations" not in st.session_state:
+       if "annotations" not in st.session_state:
          st.session_state.annotations = annotations_data
+
+
+
+        
+
+
+
 
 
 
@@ -152,7 +159,7 @@ else:
             with col_next:
                 if st.button("⬅️ إرسال والانتقال للسؤال التالي"):
                     row_number = st.session_state.index + 2
-                    if st.session_state.index < len(annotations_data):
+                    if st.session_state.index < len(existing_rows):
                         sheet.update(f"A{row_number}:B{row_number}", [row])
                     else:
                         sheet.append_row(row)
@@ -166,6 +173,7 @@ else:
                     # Save current index to D1 (resume functionality)
                     sheet.update_acell("D1", str(st.session_state.index))
 
+                    
                     st.rerun()
 
         else:
