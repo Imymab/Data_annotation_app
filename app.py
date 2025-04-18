@@ -123,18 +123,18 @@ else:
             row = [question, urgency_value]
 
             # Save/Update Google Sheet
-            row_number = st.session_state.index + 2
-            if st.session_state.index < len(existing_data) - header_offset:
-                sheet.update(f"A{row_number}:B{row_number}", [row])
-            else:
-                sheet.append_row(row)
-
+            
             # Update local session
             if st.session_state.index < len(st.session_state.annotations):
                 st.session_state.annotations[st.session_state.index] = row
             else:
                 st.session_state.annotations.append(row)
 
+            row_number = st.session_state.index + 2
+            if st.session_state.index < len(existing_data) - header_offset:
+                sheet.update(f"A{row_number}:B{row_number}", [row])
+            else:
+                sheet.append_row(row)
             # Navigation
             col_prev, col_next = st.columns([1, 1])
             with col_prev:
