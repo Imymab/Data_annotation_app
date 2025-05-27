@@ -61,7 +61,7 @@ if not st.session_state.authenticated:
 else:
     sheet_name = st.session_state.doctor_sheet
     sheet = client.open_by_key(SHEET_ID).worksheet(sheet_name)
-    df = pd.read_excel("questions_unique.xlsx")
+    df = pd.read_excel("needs_4th_annotation.xlsx")
 
     # Define urgency options with numerical mapping
     urgency_mapping = {
@@ -107,7 +107,7 @@ else:
         st.title("تصنيف الأسئلة الطبية")
 
         if st.session_state.index < len(df):
-            question = df.iloc[st.session_state.index]["Msa_questions"]
+            question = df.iloc[st.session_state.index]["question"]
             st.markdown(f"**📝 السؤال {st.session_state.index +1}:** {question}")
 
             previous_choice = None
